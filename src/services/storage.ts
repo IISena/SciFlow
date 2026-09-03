@@ -2,6 +2,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ACTIVE_EXECUTION_KEY = "@sciflow:active-execution";
 const HISTORY_KEY = "@sciflow:history";
+const LAST_VISITED_PROTOCOL_KEY = "@sciflow:last-visited-protocol";
+
+export type ProtocolShortcut = {
+  id: string;
+  code: string;
+  name: string;
+  route: string;
+};
 
 export type TimerState = {
   remainingSeconds: number;
@@ -93,5 +101,23 @@ export async function addToHistory(execution: ExecutionRecord): Promise<void> {
     await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
   } catch (error) {
     console.error("Erro ao salvar histórico:", error);
+  }
+}
+
+export async function saveLastVisitedProtocol(protocol: ProtocolShortcut): Promise<void> {
+  try {
+    await AsyncStorage.setItem(LAST_VISITED_PROTOCOL_KEY, JSON.stringify(protocol));
+  } catch (error) {
+    console.error("Erro ao salvar último protocolo visitado:", error);
+  }
+}
+
+export async function getLastVisitedProtocol(): Promise<ProtocolShortcut | null> {
+  try {
+    const data = await AsyncStorage.getItem(LAST_VISITED_PROTOCOL_KEY);
+    return data ? (JSON.parse(data) as ProtocolShortcut) : null;
+  } catch (error) {
+    console.error("Erro ao carregar último protocolo visitado:", error);
+    return null;
   }
 }

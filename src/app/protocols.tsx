@@ -2,7 +2,9 @@ import { useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { BioHeader, BottomNav, Chip } from "@/components/bio-shell";
+import { cfsProtocolShortcut } from "@/constants/cfs-protocol";
 import { colors, Fonts } from "@/constants/theme";
+import { saveLastVisitedProtocol } from "@/services/storage";
 
 const protocols = [
   { id:"cfs", code:"PRT-001", badge:"EM EXECUÇÃO", name:"Produção de Sobrenadante (CFS)", description:"Isolamento e purificação de metabólitos secundários bioativos livres de células bacterianas.", info:"10.000 RPM  •  4°C", target:"Xenorhabdus spp.", time:"48 horas", available:true },
@@ -14,17 +16,24 @@ const protocols = [
 export default function ProtocolsScreen(){
   const [search,setSearch]=useState(""); const [filter,setFilter]=useState("Todos");
   const list=useMemo(()=>protocols.filter(p=>p.name.toLowerCase().includes(search.toLowerCase())),[search]);
-  const open=(id:string,available?:boolean)=>available?router.push("/protocols/cfs"):Alert.alert("Protocolo catalogado","A execução guiada deste protocolo será disponibilizada em uma próxima versão.");
+  const open=async(id:string,available?:boolean)=>{
+    if (!available) {
+      Alert.alert("Protocolo catalogado","A execução guiada deste protocolo será disponibilizada em uma próxima versão.");
+      return;
+    }
+    await saveLastVisitedProtocol(cfsProtocolShortcut);
+    router.push("/protocols/cfs");
+  };
   return <View style={s.screen}><BioHeader/><ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
     <View style={s.titleRow}><View><Text selectable style={s.title}>Biblioteca de Protocolos</Text><Text style={s.subtitle}>24 ASSAYS CATALOGADOS • ATUALIZADO HOJE</Text></View><Text style={s.history}>◷</Text></View>
     <View style={s.searchBox}><Text style={s.searchIcon}>⌕</Text><TextInput value={search} onChangeText={setSearch} style={s.search} placeholder="Buscar protocolo, cepa ou técnica..." placeholderTextColor={colors.outline}/></View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filters}>{["Todos","Metabólitos","Antifúngicos","Triagem","Biocontrole"].map(x=><Pressable key={x} onPress={()=>setFilter(x)}><Chip active={filter===x}>{x}{x==="Todos"?"  24":""}</Chip></Pressable>)}</ScrollView>
-    {list.map((p,index)=><Pressable key={p.id} onPress={()=>open(p.id,p.available)} style={[s.card,index===0&&s.featured]}>
+    {list.map((p,index)=><Pressable key={p.id} onPress={()=>void open(p.id,p.available)} style={[s.card,index===0&&s.featured]}>
       <View style={s.cardTop}><View style={s.badges}><View style={s.codeBadge}><Text style={s.code}>{p.code}</Text></View><View style={[s.typeBadge,index===0&&s.liveBadge]}><Text style={[s.type,index===0&&s.live]}>{p.badge}</Text></View></View><Text style={s.more}>•••</Text></View>
       <Text selectable style={s.name}>{p.name}</Text><Text style={s.description}>{p.description}</Text>
       <View style={s.tech}><Text style={s.techText}>⚙  {p.info}</Text></View>
       <View style={s.dataRow}><View><Text style={s.dataLabel}>CEPA-ALVO</Text><Text style={s.dataValue}>{p.target}</Text></View><View><Text style={s.dataLabel}>TEMPO DE ENSAIO</Text><Text style={s.dataValue}>◷  {p.time}</Text></View></View>
-      <Pressable style={index===0?s.execute:s.open} onPress={()=>open(p.id,p.available)}><Text style={index===0?s.executeText:s.openText}>{index===0?"▶  Ver Detalhes / Executar":"Abrir  →"}</Text></Pressable>
+      <Pressable style={index===0?s.execute:s.open} onPress={()=>void open(p.id,p.available)}><Text style={index===0?s.executeText:s.openText}>{index===0?"▶  Ver Detalhes / Executar":"Abrir  →"}</Text></Pressable>
     </Pressable>)}
     <View style={s.newCard}><View><Text style={s.newTitle}>⊕  Novo Protocolo</Text><Text style={s.description}>Crie pipelines e etapas personalizadas</Text></View><Pressable style={s.create} onPress={()=>Alert.alert("Em breve","O editor de protocolos chegará em uma próxima versão.")}><Text style={s.createText}>Criar +</Text></Pressable></View>
   </ScrollView><BottomNav active="protocols"/></View>;

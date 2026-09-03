@@ -40,6 +40,13 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "runtimeVersion": "1.1.0"
+    "runtimeVersion": "1.1.0",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2e2a9a33-a0b9-4ebc-bbc9-3149beaba38a"
+      }
+    },
+    "owner": "iisena"
   }
 }

@@ -1,0 +1,163 @@
+POP – Determinação de CIM e CBM por microdiluição
+
+1. Preparo dos meios e soluções
+
+1.1. Mueller-Hinton Agar (MHA)
+
+1. Preparar conforme a concentração indicada pelo fabricante. Para formulação de 38 g/L:
+   - 100 mL: 3,8 g;
+   - 500 mL: 19 g;
+   - 1 L: 38 g.
+2. Suspender o pó em água destilada e completar para o volume desejado.
+3. Aquecer até completa dissolução.
+4. Autoclavar a 121 °C por 15 min ou conforme fabricante.
+5. Resfriar até aproximadamente 45–50 °C e distribuir em placas de Petri estéreis.
+6. Deixar solidificar e armazenar as placas invertidas.
+
+1.2. Mueller-Hinton Broth (MHB)
+
+1. Preparar conforme fabricante. Para formulação de 21 g/L:
+   - 100 mL: 2,1 g;
+   - 500 mL: 10,5 g;
+   - 1 L: 21 g.
+2. Dissolver em água destilada.
+3. Completar o volume.
+4. Autoclavar a 121 °C por 15 min ou conforme fabricante.
+5. Resfriar antes do uso.
+
+1.3. NaCl 0,85%
+
+1. Pesar 0,85 g de NaCl para cada 100 mL de solução.
+2. Dissolver em aproximadamente 80% do volume final de água destilada.
+3. Completar para o volume desejado.
+4. Autoclavar a 121 °C por 15 min.
+5. Resfriar e manter em recipiente estéril fechado.
+
+---
+
+2. Cultivo inicial da bactéria
+
+1. Semear a bactéria em MHA pelo método de esgotamento para obtenção de colônias isoladas.
+2. Incubar a placa invertida a 37 °C por 18–24 h.
+3. Confirmar crescimento de colônias isoladas e morfologicamente homogêneas.
+4. Selecionar 4–5 colônias isoladas para preparação do inóculo.
+
+---
+
+3. Obtenção da cultura em fase exponencial
+
+1. Transferir as 4–5 colônias selecionadas para MHB estéril.
+2. Incubar a 37 °C, nas condições de aeração previamente estabelecidas para a cepa.
+3. Acompanhar o crescimento pela DO₆₀₀.
+4. Zerar o espectrofotômetro utilizando MHB estéril como branco.
+5. Homogeneizar a cultura antes de cada leitura.
+6. Para E. coli, utilizar a cultura quando atingir aproximadamente DO₆₀₀ = 0,6, desde que esse ponto corresponda à fase exponencial na curva de crescimento previamente estabelecida.
+7. Registrar a DO e o horário da coleta.
+
+«Importante: DO₆₀₀ = 0,6 indica o ponto de coleta definido pela curva de crescimento e não deve ser utilizada diretamente como estimativa de UFC/mL.»
+
+---
+
+4. Preparo do inóculo
+
+1. A partir da cultura em DO₆₀₀ ≈ 0,6, preparar a suspensão de trabalho utilizando NaCl 0,85% estéril.
+2. Diluir conforme a relação DO/UFC previamente determinada para a cepa, visando aproximadamente 4–5 × 10⁶ UFC/mL.
+3. Homogeneizar.
+4. Utilizar a suspensão imediatamente.
+5. Confirmar posteriormente a concentração real por contagem de UFC.
+
+---
+
+5. Preparo da microplaca
+
+1. Utilizar placa estéril de 96 poços.
+2. Preparar diluições seriadas do antimicrobiano, preferencialmente em razão 2.
+3. Distribuir 100 µL da solução do antimicrobiano em cada poço.
+4. Adicionar 10 µL do inóculo aos poços experimentais.
+5. A concentração bacteriana final deve ficar próxima de 4–5 × 10⁵ UFC/mL.
+6. Incluir:
+   - controle de crescimento: meio + bactéria;
+   - controle de esterilidade: somente meio;
+   - controle de veículo: veículo + bactéria, quando aplicável.
+
+«Considerar a diluição provocada pela adição do inóculo ao calcular a concentração final do antimicrobiano.»
+
+---
+
+6. Verificação do inóculo
+
+Imediatamente após a inoculação:
+
+1. Fazer diluições seriadas do controle de crescimento em NaCl 0,85%.
+2. Semear uma diluição adequada em MHA, em duplicata.
+3. Incubar a 37 °C.
+4. Contar as colônias e calcular:
+
+[
+UFC/mL=\frac{\text{nº de colônias}}{\text{volume semeado (mL)}\times\text{diluição}}
+]
+
+5. Confirmar que o inóculo utilizado ficou próximo da concentração planejada.
+
+---
+
+7. Incubação e determinação da CIM
+
+1. Incubar a microplaca a 37 °C por 18–24 h para E. coli.
+2. Confirmar:
+   - crescimento no controle positivo;
+   - ausência de crescimento no controle de esterilidade.
+3. Avaliar visualmente os poços.
+4. Definir a CIM como a menor concentração sem crescimento bacteriano visível.
+
+---
+
+8. Determinação da CBM
+
+1. Selecionar o poço correspondente à CIM e todos os poços de concentrações superiores sem crescimento.
+2. Homogeneizar cada poço cuidadosamente.
+3. Retirar 100 µL.
+4. Semear em MHA.
+5. Incubar a 37 °C pelo período adequado à bactéria.
+6. Contar as colônias recuperadas.
+
+Calcular o limite correspondente a 0,1% de sobrevivência:
+
+[
+L=N_0\times0,1\times0,001
+]
+
+onde N_0 é o inóculo inicial confirmado em UFC/mL.
+
+A CBM será a menor concentração que apresentar redução de ≥99,9% das células viáveis.
+
+---
+
+9. Critérios de validade
+
+O ensaio será considerado válido quando:
+
+- o controle de crescimento apresentar crescimento;
+- o controle de esterilidade permanecer sem crescimento;
+- a cultura estiver pura;
+- o controle de veículo estiver adequado;
+- a contagem confirmar o inóculo esperado;
+- os controles de qualidade utilizados estiverem dentro dos limites estabelecidos.
+
+---
+
+10. Registro
+
+Registrar para cada experimento:
+
+Parâmetro| Resultado
+Bactéria/cepa| 
+DO₆₀₀ no momento da coleta| 
+UFC/mL inicial| 
+CIM| 
+Limite de UFC para CBM| 
+CBM| 
+Controles adequados?| 
+Observações| 
+
+Nota: para outras bactérias Gram-positivas ou Gram-negativas, manter o princípio do ensaio, mas ajustar meio, temperatura, tempo de incubação e ponto da fase exponencial conforme as características da espécie.

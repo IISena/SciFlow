@@ -1,27 +1,59 @@
-import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { BioHeader, BottomNav, SectionTitle } from "@/components/bio-shell";
-import { colors, Fonts } from "@/constants/theme";
+import { useCallback, useRef, useState } from "react";
+import { Text } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { Page, Card, Field, Button, ui } from "@/components/protocol-ui";
+import { protocolSteps } from "@/constants/cim-cbm-protocol";
+import { ExecutionRecord, getActiveExecution, getHistory, updateExecution } from "@/services/storage";
 
-const initial=[
-  {time:"13:15",day:"Hoje",tag:"Fase 2",text:"Inoculação concluída com sucesso. Sem sinais de precipitação inicial. Leitura de OD600 dentro dos parâmetros aceitáveis.",meta:"OD600: 0.838 Abs"},
-  {time:"09:45",day:"Hoje",tag:"Preparo",text:"Calibração e assepsia da câmara de fluxo laminar finalizadas. Reagentes climatizados a 22°C.",meta:"HEPA 99.99% OK  •  22.0°C estável"},
-  {time:"18:20",day:"Ontem",tag:"Esterilização",text:"Preparo de 500 mL de meio LB suplementado e autoclavagem a 121°C por 20 min.",meta:"Ciclo Autoclave #881  •  Validado"},
-];
-export default function NotesScreen(){
-  const [text,setText]=useState(""); const [entries,setEntries]=useState(initial); const [recording,setRecording]=useState(false);
-  function save(){if(!text.trim()){Alert.alert("Registro vazio","Escreva uma observação antes de salvar.");return;}setEntries([{time:new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),day:"Hoje",tag:"Novo",text:text.trim(),meta:"Sincronizado no Lote #492A"},...entries]);setText("");Alert.alert("Registro salvo","A anotação foi adicionada ao Lote #492A.");}
-  return <View style={s.screen}><BioHeader compact/><ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-    <View style={s.sync}><Text style={s.syncText}>ELN ATIVO • BIOLAB SYNC</Text><Text style={s.saved}>☁ AUTOSALVO</Text></View><Text selectable style={s.title}>Diário de Bancada</Text><Text style={s.subtitle}>CFS - Lote #492A</Text>
-    <View style={s.metrics}>{[["OD600 ALVO","0.84","±0.02"],["TEMP. BLOCO","37.1","°C"],["PH ATUAL","7.35","std"]].map(([label,value,unit])=><View key={label} style={s.metric}><Text style={s.metricLabel}>{label}</Text><Text style={s.metricValue}>{value}</Text><Text style={s.metricUnit}>{unit}</Text></View>)}</View>
-    <View style={s.editor}><View style={s.editorTop}><Text style={s.editorTitle}>NOVO REGISTRO</Text><Text style={s.timestamp}>◷ {new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"short"})}, agora</Text></View>
-      {recording&&<View style={s.recording}><View style={s.redDot}/><Text style={s.recordText}>Gravando Nota Vocal (Modo Luvas)...</Text></View>}
-      <TextInput value={text} onChangeText={setText} multiline style={s.input} placeholder="Registre observações, resultados, desvios ou hipóteses experimentais..." placeholderTextColor={colors.outline}/><View style={s.count}><Text style={s.countText}>CARACTERES: {text.length}</Text><Text style={s.syntax}>⌁ SINTAXE BIOMARK</Text></View>
-      <View style={s.actions}><Pressable style={[s.tool,recording&&s.toolActive]} onPress={()=>setRecording(v=>!v)}><Text style={s.toolText}>◉  {recording?"Parar Voz":"Gravar Voz"}</Text></Pressable><Pressable style={s.tool} onPress={()=>Alert.alert("Foto da placa","A captura será habilitada na próxima versão.")}><Text style={s.toolText}>▣  Foto Placa</Text></Pressable><Pressable style={s.save} onPress={save}><Text style={s.saveText}>⊕  Salvar Entrada</Text></Pressable></View>
-    </View>
-    <SectionTitle detail={`${entries.length} REGISTROS`}>Linha do Tempo</SectionTitle><View style={s.timeline}>{entries.map((e,i)=><View key={`${e.time}-${i}`} style={s.entryRow}><View style={s.line}><View style={s.pin}/>{i<entries.length-1&&<View style={s.vertical}/>}</View><View style={s.entry}><View style={s.entryTop}><Text style={s.time}>{e.time} <Text style={s.day}>• {e.day}</Text></Text><View style={s.tag}><Text style={s.tagText}>{e.tag}</Text></View></View><Text selectable style={s.entryText}>{e.text}</Text><View style={s.meta}><Text style={s.metaText}>✓ {e.meta}</Text></View></View></View>)}</View>
-  </ScrollView><BottomNav active="notes"/></View>;
+export default function NotesScreen() {
+  const [active, setActive] = useState<ExecutionRecord | null>(null);
+  const [history, setHistory] = useState<ExecutionRecord[]>([]);
+  const [draft, setDraft] = useState("");
+  const [error, setError] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const lock = useRef(false);
+  useFocusEffect(useCallback(() => {
+    let mounted = true;
+    void (async () => {
+      const record = await getActiveExecution();
+      const records = await getHistory();
+      if (mounted) { setActive(record); setHistory(records); setLoaded(true); setError(""); }
+    })().catch(() => { if (mounted) setError("Não foi possível carregar as anotações."); });
+    return () => { mounted = false; };
+  }, []));
+  async function save() {
+    if (!active || lock.current) return;
+    if (!draft.trim()) { setError("Escreva uma observação antes de salvar."); return; }
+    lock.current = true; setBusy(true);
+    try {
+      const text = draft.trim();
+      const key = "entry:" + new Date().toISOString();
+      const updated = await updateExecution(active.id, record => ({ ...record, notes: { ...record.notes, [key]: text } }));
+      setActive(updated); setDraft(""); setError("");
+    } catch { setError("Não foi possível salvar. Seu texto permanece no campo para tentar novamente."); }
+    finally { setBusy(false); lock.current = false; }
+  }
+  const records = [...(active ? [active] : []), ...history.filter(record => record.id !== active?.id)];
+  return <Page title="Diário de bancada" subtitle="Anotações reais das execuções, salvas neste dispositivo." active="notes">
+    {error !== "" && <Text style={ui.error}>{error}</Text>}
+    {!loaded ? <Text style={ui.muted}>Carregando...</Text> : active ? <Card>
+      <Text style={ui.heading}>Novo registro</Text><Text style={ui.muted}>{active.protocolName} • {active.preparation?.bacteria}</Text>
+      <Field label="Anotação" value={draft} onChangeText={setDraft} multiline editable={!busy} />
+      <Button disabled={busy} title={busy ? "Salvando..." : "Salvar anotação"} onPress={() => void save()} />
+    </Card> : <Card><Text style={ui.text}>Inicie uma execução para adicionar anotações.</Text><Button title="Abrir protocolo" onPress={() => router.push("/protocols/cim-cbm")} /></Card>}
+    {records.map(record => {
+      const entries = Object.entries(record.notes).filter(([, text]) => text.trim());
+      if (!entries.length) return null;
+      return <Card key={record.id}>
+        <Text selectable style={ui.heading}>{record.protocolName}</Text>
+        <Text style={ui.kicker}>{record.status === "in_progress" ? "EXECUÇÃO ATIVA" : record.status === "archived" ? "REGISTRO ANTERIOR ARQUIVADO" : "EXECUÇÃO CONCLUÍDA"} • {new Date(record.startedAt).toLocaleDateString("pt-BR")}</Text>
+        {entries.map(([key, text]) => <Card key={key}>
+          <Text style={ui.kicker}>{key.startsWith("entry:") ? new Date(key.slice(6)).toLocaleString("pt-BR") : (record.protocolId === "cim-cbm" ? protocolSteps.find(step => step.id === key)?.title : null) ?? "Anotação do protocolo anterior"}</Text>
+          <Text selectable style={ui.text}>{text}</Text>
+        </Card>)}
+      </Card>;
+    })}
+    {loaded && records.every(record => !Object.values(record.notes).some(text => text.trim())) && <Text style={ui.muted}>Nenhuma anotação salva.</Text>}
+  </Page>;
 }
-const s=StyleSheet.create({
-  screen:{flex:1,backgroundColor:colors.background},content:{padding:16,paddingBottom:110,gap:12},sync:{flexDirection:"row",justifyContent:"space-between"},syncText:{color:colors.primarySoft,fontFamily:Fonts.mono,fontSize:8,letterSpacing:1},saved:{color:colors.textSecondary,fontFamily:Fonts.mono,fontSize:8},title:{color:colors.text,fontSize:24,fontWeight:"800"},subtitle:{color:colors.textSecondary,fontFamily:Fonts.mono,fontSize:10},metrics:{flexDirection:"row",gap:8},metric:{flex:1,backgroundColor:colors.surfaceLow,borderRadius:11,padding:10},metricLabel:{color:colors.outline,fontFamily:Fonts.mono,fontSize:7},metricValue:{color:colors.text,fontFamily:Fonts.mono,fontSize:20,fontWeight:"800",marginTop:4},metricUnit:{color:colors.primarySoft,fontFamily:Fonts.mono,fontSize:8},editor:{backgroundColor:colors.surfaceLow,borderRadius:15,padding:14,gap:10,borderTopWidth:1,borderTopColor:colors.primary},editorTop:{flexDirection:"row",justifyContent:"space-between"},editorTitle:{color:colors.text,fontFamily:Fonts.mono,fontSize:10,fontWeight:"800"},timestamp:{color:colors.textSecondary,fontFamily:Fonts.mono,fontSize:8},recording:{backgroundColor:"rgba(144,24,34,.35)",borderRadius:8,padding:9,flexDirection:"row",alignItems:"center",gap:7},redDot:{width:7,height:7,borderRadius:4,backgroundColor:colors.secondary},recordText:{color:colors.secondary,fontSize:9,fontFamily:Fonts.mono},input:{minHeight:130,backgroundColor:colors.surfaceLowest,borderRadius:10,padding:12,color:colors.text,textAlignVertical:"top",fontSize:12,lineHeight:18,borderWidth:1,borderColor:colors.surfaceHigh},count:{flexDirection:"row",justifyContent:"space-between"},countText:{color:colors.outline,fontFamily:Fonts.mono,fontSize:7},syntax:{color:colors.primarySoft,fontFamily:Fonts.mono,fontSize:7},actions:{flexDirection:"row",gap:6,flexWrap:"wrap"},tool:{height:42,paddingHorizontal:10,borderRadius:9,backgroundColor:colors.surfaceHigh,alignItems:"center",justifyContent:"center"},toolActive:{backgroundColor:colors.secondaryDark},toolText:{color:colors.text,fontSize:9,fontWeight:"700"},save:{height:42,paddingHorizontal:12,borderRadius:9,backgroundColor:colors.primary,alignItems:"center",justifyContent:"center",marginLeft:"auto"},saveText:{color:colors.primaryDark,fontSize:9,fontWeight:"900"},timeline:{gap:0},entryRow:{flexDirection:"row",gap:10},line:{width:16,alignItems:"center"},pin:{width:12,height:12,borderRadius:6,backgroundColor:colors.primary,marginTop:15,boxShadow:"0 0 8px #00F59B"},vertical:{width:1,backgroundColor:colors.border,flex:1},entry:{flex:1,backgroundColor:colors.surfaceLow,borderRadius:13,padding:13,marginBottom:12,gap:9},entryTop:{flexDirection:"row",justifyContent:"space-between"},time:{color:colors.primarySoft,fontFamily:Fonts.mono,fontSize:9,fontWeight:"800"},day:{color:colors.outline},tag:{backgroundColor:colors.surfaceHigh,borderRadius:8,paddingHorizontal:8,paddingVertical:4},tagText:{color:colors.textSecondary,fontFamily:Fonts.mono,fontSize:7},entryText:{color:colors.text,fontSize:11,lineHeight:17},meta:{backgroundColor:colors.surface,padding:8,borderRadius:7},metaText:{color:colors.primarySoft,fontFamily:Fonts.mono,fontSize:8}
-});

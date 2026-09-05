@@ -7,8 +7,8 @@ import { colors, Fonts } from "@/constants/theme";
 export type MainRoute = "home" | "protocols" | "execution" | "history" | "notes";
 const navItems = [
   { route: "home", label: "Início", icon: "⌂", href: "/" },
-  { route: "protocols", label: "Protocolos", icon: "⚗", href: "/protocols" },
-  { route: "execution", label: "Execução", icon: "◷", href: "/protocols/cfs-execution" },
+  { route: "protocols", label: "Protocolo", icon: "⚗", href: "/protocols" },
+  { route: "execution", label: "Execução", icon: "◷", href: "/protocols/cim-cbm-execution" },
   { route: "history", label: "Histórico", icon: "▦", href: "/history" },
   { route: "notes", label: "Anotações", icon: "≡", href: "/notes" },
 ] as const;
@@ -20,7 +20,7 @@ export function BioHeader({ compact = false }: { compact?: boolean }) {
       <View style={styles.brandNameRow}><Text selectable style={styles.brand}>SciFlow</Text><View style={styles.liveDot} /></View>
       {!compact && <Text selectable style={styles.brandSub}>BIOLAB OS</Text>}
     </View></View>
-    <View style={styles.headerRight}><View style={styles.online}><View style={styles.alertDot} /><Text style={styles.onlineText}>ONLINE</Text></View><View style={styles.avatar}><Text style={styles.avatarText}>GS</Text></View></View>
+    <View style={styles.headerRight}><View style={styles.online}><View style={styles.alertDot} /><Text style={styles.onlineText}>LOCAL</Text></View></View>
   </View>;
 }
 
